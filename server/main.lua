@@ -60,6 +60,44 @@ QBCore.Functions.CreateCallback('qb-vehiclekeys:server:GetVehicleKeys', function
     cb(keysList)
 end)
 
+RegisterNetEvent('qb-vehiclekeys:server:giveitem', function(arg)
+    local PlayerId = source
+    local Player = QBCore.Functions.GetPlayer(PlayerId)
+    if arg == 1 then
+        local amount = math.random(2, 4)
+        local PocketItems = {
+            'phone',
+            'snikkel_candy',
+            'tosti',
+        }
+        local Item = PocketItems[math.random(#PocketItems)]
+        Player.Functions.AddItem(Item, amount)
+        TriggerClientEvent('inventory:client:ItemBox', PlayerId, QBCore.Shared.Items[Item], "add", amount)
+    elseif arg == 2 then
+        local amount = math.random(2, 4)
+        local DoorItems = {
+            'phone',
+            'snikkel_candy',
+            'tosti',
+        }
+        local Item = DoorItems[math.random(#DoorItems)]
+        Player.Functions.AddItem(Item, amount)
+        TriggerClientEvent('inventory:client:ItemBox', PlayerId, QBCore.Shared.Items[Item], "add", amount)
+    elseif arg == 3 then
+        local amount = math.random(2, 4)
+        local PocketItems = {
+            'phone',
+            'snikkel_candy',
+            'tosti',
+            'sandwich',
+            'joint'
+        }
+        local Item = PocketItems[math.random(#PocketItems)]
+        Player.Functions.AddItem(Item, amount)
+        TriggerClientEvent('inventory:client:ItemBox', PlayerId, QBCore.Shared.Items[Item], "add", amount)
+    end
+end)
+
 -----------------------
 ----   Functions   ----
 -----------------------

@@ -7,9 +7,8 @@ Config.LockNPCParkedCars = true -- Lock state for NPC parked cars [true = locked
 -- Lockpick Settings
 Config.RemoveLockpickNormal = 0.5 -- Chance to remove lockpick on fail
 Config.RemoveLockpickAdvanced = 0.2 -- Chance to remove advanced lockpick on fail
-Config.LockPickDoorEvent = function() -- This function is called when a player attempts to lock pick a vehicle
-    TriggerEvent('qb-lockpick:client:openLockpick', LockpickFinishCallback)
-end
+Config.Circles = 4 -- Amount of circles for the minigame
+Config.Time = 20 -- Time for the minigame in ms
 
 -- Carjack Settings
 Config.CarjackingTime = 7500 -- How long it takes to carjack
@@ -26,6 +25,10 @@ Config.CarjackChance = {
     ['1548507267'] = 0.0, -- throwable
     ['4257178988'] = 0.0, -- misc
 }
+
+-- Search Settings
+Config.MinSearchTime = 5000
+Config.MaxSearchTime = 8000
 
 -- Hotwire Settings
 Config.HotwireChance = 0.5 -- Chance for successful hotwire or not

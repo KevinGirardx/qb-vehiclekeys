@@ -94,6 +94,9 @@ CreateThread(function()
                     if IsControlJustPressed(0, 74) then
                         Hotwire(vehicle, plate)
                     end
+                    if IsControlJustPressed(0, 58) then
+                        SearchVehicle(vehicle, plate)
+                    end
                 end
             end
 
@@ -395,45 +398,103 @@ function LockpickDoor(isAdvanced)
     if GetVehicleDoorLockStatus(vehicle) <= 0 then return end
 
     usingAdvanced = isAdvanced
-    Config.LockPickDoorEvent()
+    exports['ps-ui']:Circle(function(success)
+        if success then
+            local chance = math.random()
+            TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
+            lastPickedVehicle = vehicle
+
+            if GetPedInVehicleSeat(vehicle, -1) == PlayerPedId() then
+                TriggerServerEvent('qb-vehiclekeys:server:AcquireVehicleKeys', QBCore.Functions.GetPlate(vehicle))
+            else
+                QBCore.Functions.Notify(Lang:t("notify.vlockpick"), 'success')
+                TriggerServerEvent('qb-vehiclekeys:server:setVehLockState', NetworkGetNetworkIdFromEntity(vehicle), 1)
+            end
+            if usingAdvanced then
+                if chance <= Config.RemoveLockpickAdvanced then
+                    TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "advancedlockpick")
+                end
+            else
+                if chance <= Config.RemoveLockpickNormal then
+                    TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "lockpick")
+                end
+            end
+        else
+            TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
+            AttemptPoliceAlert("steal")
+        end
+    end, Config.Circles, Config.Time)
 end
 
-function LockpickFinishCallback(success)
-    local vehicle = QBCore.Functions.GetClosestVehicle()
-
-    local chance = math.random()
-    if success then
-        TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
-        lastPickedVehicle = vehicle
-
-        if GetPedInVehicleSeat(vehicle, -1) == PlayerPedId() then
-            TriggerServerEvent('qb-vehiclekeys:server:AcquireVehicleKeys', QBCore.Functions.GetPlate(vehicle))
-        else
-            QBCore.Functions.Notify(Lang:t("notify.vlockpick"), 'success')
-            TriggerServerEvent('qb-vehiclekeys:server:setVehLockState', NetworkGetNetworkIdFromEntity(vehicle), 1)
+local SearchTime = nil
+function SearchVehicle(vehicle, plate)
+    local ped = PlayerPedId()
+    SearchTime = math.random(Config.MinSearchTime, Config.MaxSearchTime)
+    QBCore.Functions.Progressbar("search_vehicle", 'Searching Pockets', SearchTime, false, true, {
+        disableMovement = true,
+        disableCarMovement = true,
+        disableMouse = false,
+        disableCombat = true
+    }, {
+        animDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
+        anim = "machinic_loop_mechandplayer",
+        flags = 16
+    }, {}, {}, function() -- Done
+        if math.random(1, 100) >= 0 then
+            local args = 1
+            TriggerServerEvent('qb-vehiclekeys:server:giveitem', args)
         end
-
-    else
-        TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
-        AttemptPoliceAlert("steal")
-    end
-
-    if usingAdvanced then
-        if chance <= Config.RemoveLockpickAdvanced then
-            TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "advancedlockpick")
-        end
-    else
-        if chance <= Config.RemoveLockpickNormal then
-            TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "lockpick")
-        end
-    end
+        StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+        Wait(1000)
+        SearchTime = math.random(Config.MinSearchTime, Config.MaxSearchTime)
+        QBCore.Functions.Progressbar("search_vehicle", 'Searching Door Pockets', SearchTime, false, true, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true
+        }, {
+            animDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
+            anim = "machinic_loop_mechandplayer",
+            flags = 16
+        }, {}, {}, function() -- Done
+            if math.random(1, 100) >= 50 then
+                local args = 2
+                TriggerServerEvent('qb-vehiclekeys:server:giveitem', args)
+            end
+            StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+            Wait(1000)
+            SearchTime = math.random(Config.MinSearchTime, Config.MaxSearchTime)
+            QBCore.Functions.Progressbar("search_vehicle", 'Searching Backseat', SearchTime, false, true, {
+                disableMovement = true,
+                disableCarMovement = true,
+                disableMouse = false,
+                disableCombat = true
+            }, {
+                animDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
+                anim = "machinic_loop_mechandplayer",
+                flags = 16
+            }, {}, {}, function() -- Done
+                if math.random(1, 100) >= 80 then
+                    local args = 3
+                    TriggerServerEvent('qb-vehiclekeys:server:giveitem', args)
+                    TriggerServerEvent('qb-vehiclekeys:server:AcquireVehicleKeys', plate)
+                end
+                StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+            end, function() -- Cancel
+                StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+            end)
+        end, function() -- Cancel
+            StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+        end)
+    end, function() -- Cancel
+        StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
+    end)
 end
 
 function Hotwire(vehicle, plate)
     local hotwireTime = math.random(Config.minHotwireTime, Config.maxHotwireTime)
     local ped = PlayerPedId()
     IsHotwiring = true
-
     SetVehicleAlarm(vehicle, true)
     SetVehicleAlarmTimeLeft(vehicle, hotwireTime)
     QBCore.Functions.Progressbar("hotwire_vehicle", Lang:t("progress.hskeys"), hotwireTime, false, true, {
@@ -444,7 +505,7 @@ function Hotwire(vehicle, plate)
     }, {
         animDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
         anim = "machinic_loop_mechandplayer",
-        flags = 16
+        flags = 1
     }, {}, {}, function() -- Done
         StopAnimTask(ped, "anim@amb@clubhouse@tutorial@bkr_tut_ig3@", "machinic_loop_mechandplayer", 1.0)
         TriggerServerEvent('hud:server:GainStress', math.random(1, 4))

@@ -1,6 +1,8 @@
 # qb-vehiclekeys
 Vehicle Keys System For QB-Core
 
+# Nothing special but its just the search vehicle seats etc with chance to get items or keys, this is by no means perfect and can be easily exploited to keep getting items but you can build of this. Threw this together quickly as alot of persons keep asking me for the one i used for my live server :) . 
+
 # License
 
     QBCore Framework
